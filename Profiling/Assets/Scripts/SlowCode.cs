@@ -1,45 +1,31 @@
+using System;
 using UnityEngine;
 
 public class SlowCode : MonoBehaviour
 {
+    private static readonly int ColorId = Shader.PropertyToID("_BaseColor");
+    private Renderer targetRenderer;
+    private MaterialPropertyBlock properties;
     private float timeValueRed;
 
     private float timeValueGreen;
 
     private float timeValueBlue;
-    
-    void Update()
+
+    private void Awake()
     {
-        GetComponent<Renderer>().material.color = ColorForTime();
-        DoLoopStuff();
-        DoSomethingElse();
+        targetRenderer = GetComponent<Renderer>();
+        properties = new MaterialPropertyBlock();
     }
-    
-    private void DoLoopStuff()
+
+    private void Update()
     {
-        for (int i = 0; i < 2500; i++)
-        {
-            GetComponent<Renderer>().material.color = ColorForTime();
-        }
-    }
-    
-    private Color ColorForTime()
-    {
-        timeValueRed += Time.deltaTime;
-        if (timeValueRed > 1f)
-            timeValueRed -= 1f;
-        timeValueGreen += Time.deltaTime * 2f;
-        if (timeValueGreen > 1f)
-            timeValueGreen -= 1f;
-        timeValueBlue += Time.deltaTime * 3f;
-        if (timeValueBlue > 1f)
-            timeValueBlue -= 1f;
+        float deltaTime = Time.deltaTime;
+        timeValueRed = Mathf.Repeat(timeValueRed + deltaTime, 1f);
+        timeValueGreen = Mathf.Repeat(timeValueGreen + deltaTime * 2f, 1f);
+        timeValueBlue = Mathf.Repeat(timeValueBlue + deltaTime * 3f, 1f);
         
-        return new Color(timeValueRed, timeValueGreen, timeValueBlue);
-    }
-    
-    private void DoSomethingElse()
-    {
-        Debug.Log("look how slow logging is!!");
+        properties.SetColor(ColorId, new Color(timeValueRed, timeValueGreen, timeValueBlue));
+        targetRenderer.SetPropertyBlock(properties);
     }
 }
